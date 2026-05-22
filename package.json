@@ -1,0 +1,23 @@
+{
+  "name": "filesystem-messenger-pro",
+  "version": "3.0.0",
+  "description": "Мессенджер на Node.js + Express + WebSocket с групповыми чатами, файлами и мобильным интерфейсом",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "messenger",
+    "express",
+    "ws",
+    "json-storage",
+    "group-chat"
+  ],
+  "author": "OpenAI",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "ws": "^8.18.3",
+    "multer": "^1.4.5-lts.1"
+  }
+}

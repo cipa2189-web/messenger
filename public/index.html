@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Messenger Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <section id="auth-screen" class="screen auth-screen">
+        <div class="auth-shell">
+          <div class="auth-side glass-card">
+            <div class="logo-box">✦</div>
+            <h1>Messenger Pro</h1>
+            <p>
+              Быстрый мессенджер без базы данных. Все чаты хранятся в JSON-файлах на сервере,
+              а сообщения прилетают мгновенно через WebSocket.
+            </p>
+
+            <div class="feature-list">
+              <div class="feature-item">Групповые чаты</div>
+              <div class="feature-item">Онлайн-статус</div>
+              <div class="feature-item">Индикатор печати</div>
+              <div class="feature-item">Непрочитанные сообщения</div>
+              <div class="feature-item">Панель участников</div>
+              <div class="feature-item">Тёмный UI</div>
+            </div>
+          </div>
+
+          <div class="auth-card glass-card">
+            <div class="auth-brand-row">
+              <div class="auth-brand-icon">💬</div>
+              <div>
+                <div class="eyebrow">File system messenger</div>
+                <h2>Вход и регистрация</h2>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="auth-username">Имя пользователя</label>
+              <input id="auth-username" type="text" maxlength="32" placeholder="Например, natap" />
+            </div>
+
+            <div class="form-group">
+              <label for="auth-password">Пароль</label>
+              <input id="auth-password" type="password" maxlength="64" placeholder="Минимум 4 символа" />
+            </div>
+
+            <div class="form-group">
+              <label>Аватар</label>
+              <div id="avatar-picker" class="avatar-picker"></div>
+            </div>
+
+            <div class="auth-actions">
+              <button id="login-btn" class="primary-btn">Войти</button>
+              <button id="register-btn" class="secondary-btn">Зарегистрироваться</button>
+            </div>
+
+            <div id="auth-error" class="auth-error"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="messenger-screen" class="screen hidden messenger-screen">
+        <aside id="sidebar" class="sidebar">
+          <div class="sidebar-header">
+            <div id="current-user-card" class="current-user-card"></div>
+            <button id="logout-btn" class="ghost-btn small-btn">Выйти</button>
+          </div>
+
+          <div class="quick-actions">
+            <button id="open-direct-modal-btn" class="primary-btn full-btn">Новый диалог</button>
+            <button id="open-group-modal-btn" class="secondary-btn full-btn">Новая группа</button>
+          </div>
+
+          <div class="search-panel glass-soft">
+            <input id="chat-search" type="text" placeholder="Поиск по чатам и людям" />
+          </div>
+
+          <div class="sidebar-stats">
+            <div class="stat-card">
+              <div class="stat-label">Всего чатов</div>
+              <div id="total-chats-stat" class="stat-value">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">В сети</div>
+              <div id="online-stat" class="stat-value">0</div>
+            </div>
+          </div>
+
+          <div class="section-head">
+            <span>Чаты</span>
+            <span id="chat-list-caption" class="muted-text"></span>
+          </div>
+
+          <div id="chat-list" class="chat-list"></div>
+        </aside>
+        <div id="sidebar-backdrop" class="sidebar-backdrop hidden"></div>
+
+        <main class="main-layout">
+          <section id="empty-state" class="empty-state glass-card">
+            <div class="empty-icon">🚀</div>
+            <h2>Откройте чат или создайте новый</h2>
+            <p>
+              Слева доступны личные диалоги и группы. Справа будет история сообщений, список
+              участников и быстрые действия.
+            </p>
+            <div class="empty-actions">
+              <button id="empty-open-direct-btn" class="primary-btn">Новый диалог</button>
+              <button id="empty-open-group-btn" class="secondary-btn">Новая группа</button>
+            </div>
+          </section>
+
+          <section id="chat-panel" class="chat-panel hidden">
+            <header class="chat-header">
+              <div class="chat-header-left">
+                <button id="mobile-sidebar-btn" class="ghost-btn icon-btn mobile-only">☰</button>
+                <div id="chat-header-avatar" class="header-avatar">💬</div>
+                <div>
+                  <div class="chat-title-row">
+                    <div id="chat-header-name" class="chat-header-name"></div>
+                    <span id="chat-header-badge" class="chat-type-badge"></span>
+                  </div>
+                  <div id="chat-header-status" class="chat-header-status"></div>
+                </div>
+              </div>
+
+              <div class="chat-header-actions">
+                <button id="refresh-chat-btn" class="ghost-btn icon-btn" title="Обновить">↻</button>
+                <button id="toggle-details-btn" class="ghost-btn">Участники</button>
+              </div>
+            </header>
+
+            <div id="messages" class="messages"></div>
+            <div id="typing-indicator" class="typing-indicator"></div>
+
+            <div class="composer-wrap">
+              <div class="composer-tools">
+                <span id="composer-hint" class="muted-text">Enter — отправить, Shift+Enter — новая строка, можно прикрепить файл, записать голосовое, кружок или отправить стикер</span>
+                <div id="selected-file-box" class="selected-file-box hidden">
+                  <div class="selected-file-meta">
+                    <div id="selected-file-name" class="selected-file-name"></div>
+                    <div id="selected-file-size" class="selected-file-size"></div>
+                  </div>
+                  <button id="clear-file-btn" class="ghost-btn icon-btn" type="button" title="Убрать файл">✕</button>
+                </div>
+                <div id="recording-status" class="recording-status hidden"></div>
+                <div id="sticker-picker" class="sticker-picker hidden"></div>
+              </div>
+              <div class="message-composer">
+                <input id="file-input" type="file" hidden />
+                <div class="composer-action-group">
+                  <button id="attach-file-btn" class="secondary-btn attach-btn tool-btn" type="button" title="Прикрепить файл">
+                    <span class="tool-btn-icon">📎</span>
+                    <span class="tool-btn-label">Файл</span>
+                  </button>
+                  <button id="record-voice-btn" class="secondary-btn attach-btn tool-btn tool-btn-voice" type="button" title="Записать голосовое">
+                    <span class="tool-btn-icon">🎤</span>
+                    <span class="tool-btn-label">Голосовое</span>
+                  </button>
+                  <button id="record-circle-btn" class="secondary-btn attach-btn tool-btn" type="button" title="Записать кружок">
+                    <span class="tool-btn-icon">◉</span>
+                    <span class="tool-btn-label">Кружок</span>
+                  </button>
+                  <button id="open-stickers-btn" class="secondary-btn attach-btn tool-btn" type="button" title="Стикеры">
+                    <span class="tool-btn-icon">😊</span>
+                    <span class="tool-btn-label">Стикеры</span>
+                  </button>
+                </div>
+                <textarea id="message-input" rows="1" maxlength="4000" placeholder="Напишите сообщение или подпись к файлу"></textarea>
+                <button id="send-btn" class="primary-btn send-btn">Отправить</button>
+              </div>
+            </div>
+          </section>
+
+          <aside id="details-panel" class="details-panel hidden">
+            <div class="details-card glass-card">
+              <div class="details-top">
+                <div id="details-avatar" class="details-avatar">💬</div>
+                <div>
+                  <div id="details-title" class="details-title"></div>
+                  <div id="details-subtitle" class="details-subtitle"></div>
+                </div>
+              </div>
+
+              <div class="details-grid">
+                <div class="detail-box">
+                  <div class="detail-label">Тип</div>
+                  <div id="details-type" class="detail-value">—</div>
+                </div>
+                <div class="detail-box">
+                  <div class="detail-label">Сообщений</div>
+                  <div id="details-messages-count" class="detail-value">0</div>
+                </div>
+                <div class="detail-box">
+                  <div class="detail-label">Участников</div>
+                  <div id="details-members-count" class="detail-value">0</div>
+                </div>
+                <div class="detail-box">
+                  <div class="detail-label">Онлайн</div>
+                  <div id="details-online-count" class="detail-value">0</div>
+                </div>
+              </div>
+
+              <div class="members-section">
+                <div class="section-head compact"><span>Участники</span></div>
+                <div id="members-list" class="members-list"></div>
+              </div>
+            </div>
+          </aside>
+        </main>
+      </section>
+
+      <div id="direct-modal" class="modal hidden">
+        <div class="modal-card glass-card">
+          <div class="modal-head">
+            <h3>Новый диалог</h3>
+            <button data-close-modal="direct-modal" class="ghost-btn icon-btn">✕</button>
+          </div>
+          <input id="direct-user-search" type="text" placeholder="Найти пользователя" />
+          <div id="direct-user-list" class="modal-list"></div>
+        </div>
+      </div>
+
+      <div id="group-modal" class="modal hidden">
+        <div class="modal-card glass-card large">
+          <div class="modal-head">
+            <h3>Создать группу</h3>
+            <button data-close-modal="group-modal" class="ghost-btn icon-btn">✕</button>
+          </div>
+
+          <div class="form-group">
+            <label for="group-title">Название группы</label>
+            <input id="group-title" type="text" maxlength="48" placeholder="Например, Команда продукта" />
+          </div>
+
+          <div class="form-group">
+            <label>Иконка группы</label>
+            <div id="group-avatar-picker" class="avatar-picker"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="group-user-search">Добавить участников</label>
+            <input id="group-user-search" type="text" placeholder="Поиск по пользователям" />
+          </div>
+
+          <div id="group-user-list" class="modal-list checkbox-list"></div>
+
+          <div class="modal-actions">
+            <button data-close-modal="group-modal" class="secondary-btn">Отмена</button>
+            <button id="create-group-btn" class="primary-btn">Создать группу</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="toast-container" class="toast-container"></div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
